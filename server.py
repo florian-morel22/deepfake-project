@@ -16,10 +16,10 @@ generator = REFace(
 
 if __name__ == '__main__':
 
-    # TO TEST WITH LOCAL IMAGES
-    target = Image.open("REFace/datasets/CelebAMask-HQ/CelebA-HQ-img/0.jpg").convert("RGB")
-    source = Image.open("REFace/datasets/CelebAMask-HQ/CelebA-HQ-img/1.jpg").convert("RGB")
-    swapped = generator.face_swapp(source, target)
+    # # TO TEST WITH LOCAL IMAGES
+    # target = Image.open("REFace/datasets/CelebAMask-HQ/CelebA-HQ-img/0.jpg").convert("RGB")
+    # source = Image.open("REFace/datasets/CelebAMask-HQ/CelebA-HQ-img/1.jpg").convert("RGB")
+    # swapped = generator.face_swapp(source, target)
 
     ref_date = datetime.now()
     blacklist_ids = []
