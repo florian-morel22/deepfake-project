@@ -103,9 +103,6 @@ def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5):
                 headers = payload["headers"]
                 subject: str = [header["value"] for header in headers if header["name"] == "Subject"][0]
                 if subject.upper().startswith(key_word.upper()):
-                    with open("message.json", "w") as f:
-                        import json
-                        json.dump(message, f)
 
                     date_str = [header["value"] for header in headers if header["name"] == "Date"][0]
                     if match_ := re.search(date_pattern, date_str):
