@@ -27,18 +27,18 @@ def get_creds():
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
-    if os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    if os.path.exists("demo/token.json"):
+        creds = Credentials.from_authorized_user_file("demo/token.json", SCOPES)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                "credentials.json", SCOPES
+                "demo/credentials.json", SCOPES
             )
             creds = flow.run_local_server(port=0)
-        with open("token.json", "w") as token:
+        with open("demo/token.json", "w") as token:
             token.write(creds.to_json())
     
     return creds
@@ -103,7 +103,6 @@ def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5):
                 headers = payload["headers"]
                 subject: str = [header["value"] for header in headers if header["name"] == "Subject"][0]
                 if subject.upper().startswith(key_word.upper()):
-                    print("KEY WORD OK")
                     with open("message.json", "w") as f:
                         import json
                         json.dump(message, f)
