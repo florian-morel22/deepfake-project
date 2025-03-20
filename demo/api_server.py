@@ -76,7 +76,7 @@ def get_images_from_gmail(message_id: str, images_id: list[str]) -> list[Image.I
         # TODO(developer) - Handle errors from gmail API.
         print(f"An error occurred: {error}")
 
-def gmail_send_message(img: Image.Image, key_word: str="Swapp"):
+def gmail_send_message(imgs: list[Image.Image], text_content: str= "", key_word: str="Swapp"):
     
     creds = get_creds()
 
@@ -85,18 +85,19 @@ def gmail_send_message(img: Image.Image, key_word: str="Swapp"):
         service = build("gmail", "v1", credentials=creds)
         message = EmailMessage()
 
-        message.set_content("")
+        message.set_content(text_content)
 
         message["To"] = "cordharmonie35@gmail.com"
         message["From"] = "cordharmonie35@gmail.com"
         message["Subject"] = key_word
 
         # attachement
-        img_bytes = io.BytesIO()
-        img.save(img_bytes, format='JPEG')
-        attachment_data = img_bytes.getvalue()
+        for i, img in enumerate(imgs):
+            img_bytes = io.BytesIO()
+            img.save(img_bytes, format='JPEG')
+            attachment_data = img_bytes.getvalue()
 
-        message.add_attachment(attachment_data, "image", "jpg")
+            message.add_attachment(attachment_data, "image", "jpg", filename=f"image_{i+1}.jpg")
         
         encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
 

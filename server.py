@@ -2,8 +2,10 @@ import torch
 
 from PIL import Image
 from datetime import datetime
-from REFace.our_work.scripts.inference import REFace
 from demo.api_server import gmail_send_message, listen_gmail, get_images_from_gmail
+
+from FaceXRay.inference_hf import inference
+from REFace.our_work.scripts.inference import REFace
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 generator = REFace(
@@ -20,6 +22,8 @@ if __name__ == '__main__':
     # target = Image.open("REFace/datasets/CelebAMask-HQ/CelebA-HQ-img/0.jpg").convert("RGB")
     # source = Image.open("REFace/datasets/CelebAMask-HQ/CelebA-HQ-img/1.jpg").convert("RGB")
     # swapped = generator.face_swapp(source, target)
+    # mask, prediction = inference(swapped, device=device, save=False)
+
 
     ref_date = datetime.now()
     blacklist_ids = []
@@ -35,4 +39,16 @@ if __name__ == '__main__':
         swapped = generator.face_swapp(source, target)
 
         gmail_send_message(swapped, key_word="Swapp")
+
+        # Detection
+        masks, predictions = [], []
+        for image in [source, target, swapped]:
+
+            mask, prediction = inference(image, device=device, save=False)
+            masks.append(mask.convert("RGB"))
+            predictions.append(str(prediction))
+
+        text_content = "\n".join(predictions)
+        gmail_send_message(masks, text_content=text_content, key_word="Masks")
+
     
