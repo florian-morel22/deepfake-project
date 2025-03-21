@@ -4,6 +4,14 @@ from PIL import Image
 from datetime import datetime, timezone
 from demo.api_server import gmail_send_message, listen_gmail, get_images_from_gmail
 
+import sys
+import os
+
+# Add the directory containing the 'facexray' module to the system path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'FaceXRay')))
+
+from FaceXRay.facexray.classifier import Classifier
+from FaceXRay.facexrayCode.utils import visualize_and_save
 from FaceXRay.inference_hf import inference
 from REFace.our_work.scripts.inference import REFace
 
