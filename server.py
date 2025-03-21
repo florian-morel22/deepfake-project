@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     while True:
 
-        message_id, images_id = listen_gmail("Images", ref_date=ref_date, blacklist_ids=blacklist_ids) # loop until trigger
+        message_id, images_id, _ = listen_gmail("Images", ref_date=ref_date, blacklist_ids=blacklist_ids) # loop until trigger
         blacklist_ids.append(message_id) # Do not trigger 2 times the same email
 
         source, target = get_images_from_gmail(message_id, images_id)
