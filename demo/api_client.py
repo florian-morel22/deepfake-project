@@ -74,7 +74,7 @@ def get_images_from_gmail(message_id: str, images_id: list[str]) -> list[Image.I
         # TODO(developer) - Handle errors from gmail API.
         print(f"An error occurred: {error}")
 
-def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5):
+def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5) -> tuple[str, list[str], str]:
     creds = get_creds()
 
     buff_ids = None
@@ -117,6 +117,8 @@ def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5):
                         message_id = message["id"]
                         parts = payload["parts"]
                         images_id = [part["body"]["attachmentId"] for part in parts if part["mimeType"].startswith("image")]
+                        text_content = [part["body"]["data"] for part in parts if part["mimeType"].startswith("text")][0]
+
                         trigger = True
                         temp_ref_date = date+shift # Get ONLY the last email with key_word in the subject
             
@@ -124,5 +126,5 @@ def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5):
             # TODO(developer) - Handle errors from gmail API.
             print(f"An error occurred: {error}")
 
-    return message_id, images_id
+    return message_id, images_id, text_content
 

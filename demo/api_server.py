@@ -168,6 +168,8 @@ def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5, blackl
                         message_id = message["id"]
                         parts = payload["parts"]
                         images_id = [part["body"]["attachmentId"] for part in parts if part["mimeType"].startswith("image")]
+                        text_content = [part["body"]["data"] for part in parts if part["mimeType"].startswith("text")][0]
+
                         trigger = True
                         temp_ref_date = date # Get ONLY the last email with key_word in the subject
             
@@ -175,5 +177,5 @@ def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5, blackl
             # TODO(developer) - Handle errors from gmail API.
             print(f"An error occurred: {error}")
 
-    return message_id, images_id
+    return message_id, images_id, text_content
 

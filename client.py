@@ -6,6 +6,8 @@ from demo.utils import Image2bytes
 from datetime import datetime, timezone
 from demo.api_client import get_images_from_gmail, listen_gmail
 
+predictions = ["REAL", "FAKE"]
+
 
 def show_masks(image: np.ndarray):
     fig, ax = plt.subplots()
@@ -24,6 +26,7 @@ def main():
         st.session_state.swapp = None
         
         st.session_state.masks = None
+        st.session_state.predictions = None
 
 
     st.title('Face swapp Machine')
@@ -32,26 +35,28 @@ def main():
 
     with col1:
         if st.button("Load Images"):
-            message_id, images_id = listen_gmail("Image", ref_date=st.session_state.ref_date)
+            message_id, images_id, _ = listen_gmail("Image", ref_date=st.session_state.ref_date)
             images_pil = get_images_from_gmail(message_id, images_id)
             images_bytes = [Image2bytes(img) for img in images_pil]
             st.session_state.source = images_bytes[0]
             st.session_state.target = images_bytes[1]
             st.session_state.swapp = None
             st.session_state.masks = None
+            st.session_state.predictions = None
 
     with col2:
         if st.button('Swap Faces'):
-            message_id, images_id = listen_gmail("Swapp", ref_date=st.session_state.ref_date)
+            message_id, images_id, _ = listen_gmail("Swapp", ref_date=st.session_state.ref_date)
             images_pil = get_images_from_gmail(message_id, images_id)
             images_bytes = [Image2bytes(img) for img in images_pil]
             st.session_state.swapp = images_bytes[0]
     with col3:
         if st.button('Detect Fakes'):
-            message_id, images_id = listen_gmail("Masks", ref_date=st.session_state.ref_date)
+            message_id, images_id, text_content = listen_gmail("Masks", ref_date=st.session_state.ref_date)
             images_pil = get_images_from_gmail(message_id, images_id)
             images_numpy = [np.array(img) for img in images_pil]
             st.session_state.masks = images_numpy
+            st.session_state.predictions = [int(pred) for pred in text_content.split("\n")]
 
     st.divider()
 
@@ -64,6 +69,7 @@ def main():
             st.image(st.session_state.source)
 
         if st.session_state.masks is not None:
+            st.write(predictions[st.session_state.predictions[0]])
             show_masks(st.session_state.masks[0])
 
     with target_col:
@@ -73,6 +79,7 @@ def main():
             st.image(st.session_state.target)
 
         if st.session_state.masks is not None:
+            st.write(predictions[st.session_state.predictions[1]])
             show_masks(st.session_state.masks[1])
 
 
@@ -83,6 +90,7 @@ def main():
             st.image(st.session_state.swapp)
 
         if st.session_state.masks is not None:
+            st.write(predictions[st.session_state.predictions[2]])
             show_masks(st.session_state.masks[2])
 
 
