@@ -5,3 +5,6 @@ demo/*.json
 REFace
 
 FaceXRay
+
+**/myenv
+**/env
