@@ -6,6 +6,9 @@ setup:
 
 	git clone https://github.com/florian-morel22/REFace.git
 	git clone https://github.com/taognt/FaceXRay.git
+
+	cd FaceXRay && pip install -r requirements.txt
+	cd REFace && make setup
 	
 
 demo-run-server:
