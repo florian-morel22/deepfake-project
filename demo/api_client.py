@@ -88,7 +88,7 @@ def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5):
             results = service.users().messages().list(userId="me", labelIds=["INBOX"], maxResults=max_results).execute()
             results = results.get("messages", [])
             ids = [result["id"] for result in results]
-            print(f">> get last email : {ids}")
+            print(f">> get last emails : {ids}")
 
             if ids==buff_ids:
                 time.sleep(1) # Wait 1 seconde
@@ -111,13 +111,14 @@ def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5):
                         second = match_.group(3)
                         shift_int = int(match_.group(4))
                     date = datetime(ref_date.year, ref_date.month, ref_date.day, int(hour), int(minute), int(second), tzinfo=timezone.utc)
-                    shift = copysign(1, -shift_int) * timedelta(hours=abs(shift_int)) 
+                    shift = copysign(1, -shift_int) * timedelta(hours=abs(shift_int))
+                    print(f"date: {date+shift}")
                     if date + shift > temp_ref_date:
                         message_id = message["id"]
                         parts = payload["parts"]
                         images_id = [part["body"]["attachmentId"] for part in parts if part["mimeType"].startswith("image")]
                         trigger = True
-                        temp_ref_date = date # Get ONLY the last email with key_word in the subject
+                        temp_ref_date = date+shift # Get ONLY the last email with key_word in the subject
             
         except HttpError as error:
             # TODO(developer) - Handle errors from gmail API.
