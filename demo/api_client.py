@@ -99,11 +99,13 @@ def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5) -> tup
             for id in ids:
 
                 message = service.users().messages().get(userId="me", id=id).execute()
+
+
                 payload = message["payload"]
                 headers = payload["headers"]
+
                 subject: str = [header["value"] for header in headers if header["name"] == "Subject"][0]
                 if subject.upper().startswith(key_word.upper()):
-
                     date_str = [header["value"] for header in headers if header["name"] == "Date"][0]
                     if match_ := re.search(date_pattern, date_str):
                         hour = match_.group(1)
@@ -117,7 +119,11 @@ def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5) -> tup
                         message_id = message["id"]
                         parts = payload["parts"]
                         images_id = [part["body"]["attachmentId"] for part in parts if part["mimeType"].startswith("image")]
-                        text_content = [part["body"]["data"] for part in parts if part["mimeType"].startswith("text")][0]
+                        try:
+                            text_content_encoded = [part["body"]["data"] for part in parts[0]["parts"] if part["mimeType"] == "text/plain"][0]
+                            text_content = base64.urlsafe_b64decode(text_content_encoded).decode()
+                        except:
+                            text_content = ""
 
                         trigger = True
                         temp_ref_date = date+shift # Get ONLY the last email with key_word in the subject
