@@ -74,7 +74,7 @@ def get_images_from_gmail(message_id: str, images_id: list[str]) -> list[Image.I
         # TODO(developer) - Handle errors from gmail API.
         print(f"An error occurred: {error}")
 
-def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5):
+def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5) -> tuple[str, list[str], str]:
     creds = get_creds()
 
     buff_ids = None
@@ -88,7 +88,7 @@ def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5):
             results = service.users().messages().list(userId="me", labelIds=["INBOX"], maxResults=max_results).execute()
             results = results.get("messages", [])
             ids = [result["id"] for result in results]
-            print(f">> get last email : {ids}")
+            print(f">> get last emails : {ids}")
 
             if ids==buff_ids:
                 time.sleep(1) # Wait 1 seconde
@@ -99,11 +99,13 @@ def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5):
             for id in ids:
 
                 message = service.users().messages().get(userId="me", id=id).execute()
+
+
                 payload = message["payload"]
                 headers = payload["headers"]
+
                 subject: str = [header["value"] for header in headers if header["name"] == "Subject"][0]
                 if subject.upper().startswith(key_word.upper()):
-
                     date_str = [header["value"] for header in headers if header["name"] == "Date"][0]
                     if match_ := re.search(date_pattern, date_str):
                         hour = match_.group(1)
@@ -111,17 +113,24 @@ def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5):
                         second = match_.group(3)
                         shift_int = int(match_.group(4))
                     date = datetime(ref_date.year, ref_date.month, ref_date.day, int(hour), int(minute), int(second), tzinfo=timezone.utc)
-                    shift = copysign(1, -shift_int) * timedelta(hours=abs(shift_int)) 
+                    shift = copysign(1, -shift_int) * timedelta(hours=abs(shift_int))
+                    print(f"date: {date+shift}")
                     if date + shift > temp_ref_date:
                         message_id = message["id"]
                         parts = payload["parts"]
                         images_id = [part["body"]["attachmentId"] for part in parts if part["mimeType"].startswith("image")]
+                        try:
+                            text_content_encoded = [part["body"]["data"] for part in parts[0]["parts"] if part["mimeType"] == "text/plain"][0]
+                            text_content = base64.urlsafe_b64decode(text_content_encoded).decode()
+                        except:
+                            text_content = ""
+
                         trigger = True
-                        temp_ref_date = date # Get ONLY the last email with key_word in the subject
+                        temp_ref_date = date+shift # Get ONLY the last email with key_word in the subject
             
         except HttpError as error:
             # TODO(developer) - Handle errors from gmail API.
             print(f"An error occurred: {error}")
 
-    return message_id, images_id
+    return message_id, images_id, text_content
 
