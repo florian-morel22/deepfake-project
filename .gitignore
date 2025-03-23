@@ -3,8 +3,11 @@ demo/*.json
 **/__pycache__/
 
 REFace
-
 FaceXRay
+e4s-faceswap-dataset
+DeepFakeDetection
+Face_Swapping_VQVAE
 
 **/myenv
-**/env
+**/.env
+**/*.json
