@@ -1,5 +1,7 @@
 # deepfake-project
 
+### Presentation :
+
 This repository is the parent repository gathering all the work carried out during an ENSTA project on deepfake generation, with a particular focus on face swaps.
 
 The group members who actively participated in the project are as follows:
@@ -10,7 +12,13 @@ The group members who actively participated in the project are as follows:
 - Tao GUINOT (https://github.com/taognt)
 - Florian MOREL (https://github.com/florian-morel22)
 
-# Setup
+### Demo :
+
+This repository contains the code for a live demo of our work. Running it requires a Gmail account that can be accessed via the Gmail API for reading and writing.
+
+The demo will be presented during our project defense on Thursday, March 27, 2025, at ENSTA, Palaiseau, France.
+
+# Gathering sub-repositories
 
 In order to retrieve all the sub-repositories that make up this project, please run the following command at the root of the repository:
 
@@ -18,13 +26,15 @@ In order to retrieve all the sub-repositories that make up this project, please 
 make clone
 ```
 
-Next, to set up the sub-repositories required for the demo to work, please run the following command:
+Each repository is independent and requires a custom setup for most of them.
+
+# Demo
+
+To set up the sub-repositories required for the demo to work, please run the following command:
 
 ```
 make setup
 ```
-
-# Run Demo
 
 To run the demo, please run the following command to run the client side :
 
