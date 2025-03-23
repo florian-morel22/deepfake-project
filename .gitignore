@@ -3,3 +3,8 @@ demo/*.json
 **/__pycache__/
 
 REFace
+
+FaceXRay
+
+**/myenv
+**/env
