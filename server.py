@@ -1,18 +1,19 @@
+import os
+import sys
 import torch
 
 from PIL import Image
 from datetime import datetime, timezone
 from demo.api_server import gmail_send_message, listen_gmail, get_images_from_gmail
 
-import sys
-import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'DeepFakeDetection/Detection_classifier/mesogip_inference')))
+from DeepFakeDetection.Detection_classifier.mesogip_inference.mesogip_function import mesogip_inference 
 
 # Add the directory containing the 'facexray' module to the system path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'FaceXRay')))
-
-from FaceXRay.facexray.classifier import Classifier
-from FaceXRay.facexrayCode.utils import visualize_and_save
 from FaceXRay.inference_hf import inference
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'REFace')))
 from REFace.our_work.scripts.inference import REFace
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
@@ -49,13 +50,16 @@ if __name__ == '__main__':
 
         gmail_send_message([swapped], key_word="Swapp")
 
-        # Detection
-        masks, predictions = [], []
+        # Detection FaceXRay + Mesogip
+        masks, pred_faceXray, pred_mesonet = [], [], []
         for image in [source, target, swapped]:
 
-            mask, prediction = inference(image, device=device, save=False)
+            mask, prediction = inference(image, device=device, save=False, verbose=False)
             masks.append(mask)
-            predictions.append(str(prediction))
+            pred_faceXray.append(str(prediction))
 
-        text_content = "\n".join(predictions)
+            prediction = mesogip_inference(image)
+            pred_mesonet.append(str(prediction))
+
+        text_content = "\n".join([fxr + " " + mes for fxr, mes in zip(pred_faceXray, pred_mesonet)])
         gmail_send_message(masks, text_content=text_content, key_word="Masks")
