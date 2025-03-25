@@ -6,7 +6,9 @@ from demo.utils import Image2bytes
 from datetime import datetime, timezone
 from demo.api_client import get_images_from_gmail, listen_gmail
 
-predictions = ["REAL", "FAKE"]
+pred_visu = ["REAL", "FAKE"]
+pred_color = ["green", "red"]
+predictions = ["0", "1"]
 
 
 def show_masks(image: np.ndarray):
@@ -56,7 +58,9 @@ def main():
             images_pil = get_images_from_gmail(message_id, images_id)
             images_numpy = [np.array(img) for img in images_pil]
             st.session_state.masks = images_numpy
-            st.session_state.predictions = [int(pred) for pred in text_content.split("\n")]
+            print(f"text content >>{text_content}<<")
+            print(f"text split >>{text_content.split("\n")}<<")
+            st.session_state.predictions = [int(pred.strip()) for pred in text_content.split("\n") if pred.strip() in predictions]
 
     st.divider()
 
@@ -69,7 +73,10 @@ def main():
             st.image(st.session_state.source)
 
         if st.session_state.masks is not None:
-            st.write(predictions[st.session_state.predictions[0]])
+            st.subheader(
+                pred_visu[st.session_state.predictions[0]], 
+                divider=pred_color[st.session_state.predictions[0]]
+            )
             show_masks(st.session_state.masks[0])
 
     with target_col:
@@ -79,7 +86,10 @@ def main():
             st.image(st.session_state.target)
 
         if st.session_state.masks is not None:
-            st.write(predictions[st.session_state.predictions[1]])
+            st.subheader(
+                pred_visu[st.session_state.predictions[1]], 
+                divider=pred_color[st.session_state.predictions[1]]
+            )
             show_masks(st.session_state.masks[1])
 
 
@@ -90,7 +100,11 @@ def main():
             st.image(st.session_state.swapp)
 
         if st.session_state.masks is not None:
-            st.write(predictions[st.session_state.predictions[2]])
+            st.write()
+            st.subheader(
+                pred_visu[st.session_state.predictions[2]], 
+                divider=pred_color[st.session_state.predictions[2]]
+            )
             show_masks(st.session_state.masks[2])
 
 

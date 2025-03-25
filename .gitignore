@@ -4,4 +4,12 @@ demo/*.json
 
 REFace
 
+FaceXRay
+e4s-faceswap-dataset
+DeepFakeDetection
+Face_Swapping_VQVAE
+
 **/*.jpg
+**/myenv
+**/.env
+**/*.json

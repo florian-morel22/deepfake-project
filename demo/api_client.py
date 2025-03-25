@@ -120,9 +120,17 @@ def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5) -> tup
                         parts = payload["parts"]
                         images_id = [part["body"]["attachmentId"] for part in parts if part["mimeType"].startswith("image")]
                         try:
-                            text_content_encoded = [part["body"]["data"] for part in parts[0]["parts"] if part["mimeType"] == "text/plain"][0]
+                            if subject == "Masks":
+                                import json
+                                #save message in json
+                                with open("messageMASK.json", "w") as f:
+                                    json.dump(message, f)
+
+                            # text_content_encoded = [part["body"]["data"] for part in parts[0]["parts"] if part["mimeType"] == "text/plain"][0]
+                            text_content_encoded = [part["body"]["data"] for part in parts if part["mimeType"] == "text/plain"][0]
                             text_content = base64.urlsafe_b64decode(text_content_encoded).decode()
-                        except:
+                        except Exception as e:
+                            print("error text content : ", e)
                             text_content = ""
 
                         trigger = True
