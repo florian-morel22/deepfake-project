@@ -168,7 +168,6 @@ def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5, blackl
                         message_id = message["id"]
                         parts = payload["parts"]
                         images_id = [part["body"]["attachmentId"] for part in parts if part["mimeType"].startswith("image")]
-                        text_content = [part["body"]["data"] for part in parts if part["mimeType"].startswith("text")][0]
                         try:
                             text_content_encoded = [part["body"]["data"] for part in parts[0]["parts"] if part["mimeType"] == "text/plain"][0]
                             text_content = base64.urlsafe_b64decode(text_content_encoded).decode()
@@ -182,5 +181,5 @@ def listen_gmail(key_word: str, ref_date: datetime, max_results: int = 5, blackl
             # TODO(developer) - Handle errors from gmail API.
             print(f"An error occurred: {error}")
 
-    return message_id, images_id, text_content, text_content
+    return message_id, images_id, text_content
 
