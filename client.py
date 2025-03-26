@@ -17,6 +17,25 @@ def show_masks(image: np.ndarray):
     ax.axis("off")  # Hide axis for better visualization
     st.pyplot(fig)
 
+def retrieve_detect(session_state):
+
+        message_id, images_id, text_content = listen_gmail("Masks", ref_date=session_state.ref_date)
+        images_pil = get_images_from_gmail(message_id, images_id)
+        images_numpy = [np.array(img) for img in images_pil]
+        session_state.masks = images_numpy
+        print(f"text content >>{text_content}<<")
+        print(f"text split >>{text_content.split("\n")}<<")
+        session_state.faceXray_pred = [
+            int(pred.strip()[0]) 
+            for pred in text_content.split("\n")
+            if pred.strip() != ""
+        ]
+        session_state.mesonet_pred = [
+            int(pred.strip()[2]) 
+            for pred in text_content.split("\n")
+            if pred.strip() != ""
+        ]
+
 
 def main():
 
@@ -31,10 +50,13 @@ def main():
         st.session_state.faceXray_pred = None
         st.session_state.mesonet_pred = None
 
+        st.session_state.display_meso_pred = False
+        st.session_state.display_fxr_pred = False
+
 
     st.title('Face swapp Machine')
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         if st.button("Load Images"):
@@ -47,6 +69,8 @@ def main():
             st.session_state.masks = None
             st.session_state.faceXray_pred = None
             st.session_state.mesonet_pred = None
+            st.session_state.display_meso_pred = False
+            st.session_state.display_fxr_pred = False
 
     with col2:
         if st.button('Swap Faces'):
@@ -55,23 +79,53 @@ def main():
             images_bytes = [Image2bytes(img) for img in images_pil]
             st.session_state.swapp = images_bytes[0]
     with col3:
-        if st.button('Detect Fakes'):
-            message_id, images_id, text_content = listen_gmail("Masks", ref_date=st.session_state.ref_date)
-            images_pil = get_images_from_gmail(message_id, images_id)
-            images_numpy = [np.array(img) for img in images_pil]
-            st.session_state.masks = images_numpy
-            print(f"text content >>{text_content}<<")
-            print(f"text split >>{text_content.split("\n")}<<")
-            st.session_state.faceXray_pred = [
-                int(pred.strip()[0]) 
-                for pred in text_content.split("\n")
-                if pred.strip() != ""
-            ]
-            st.session_state.mesonet_pred = [
-                int(pred.strip()[2]) 
-                for pred in text_content.split("\n")
-                if pred.strip() != ""
-            ]
+        if st.button('Mesonet Detection'):
+            
+            if st.session_state.faceXray_pred == None:
+                message_id, images_id, text_content = listen_gmail("Masks", ref_date=st.session_state.ref_date)
+                images_pil = get_images_from_gmail(message_id, images_id)
+                images_numpy = [np.array(img) for img in images_pil]
+                st.session_state.masks = images_numpy
+                print(f"text content >>{text_content}<<")
+                print(f"text split >>{text_content.split("\n")}<<")
+                st.session_state.faceXray_pred = [
+                    int(pred.strip()[0]) 
+                    for pred in text_content.split("\n")
+                    if pred.strip() != ""
+                ]
+                st.session_state.mesonet_pred = [
+                    int(pred.strip()[2]) 
+                    for pred in text_content.split("\n")
+                    if pred.strip() != ""
+                ]
+
+            st.session_state.display_meso_pred = True
+            st.session_state.display_fxr_pred = False
+
+    with col4:
+        if st.button('FaceXRay Detection'):
+
+            if st.session_state.faceXray_pred == None:
+                message_id, images_id, text_content = listen_gmail("Masks", ref_date=st.session_state.ref_date)
+                images_pil = get_images_from_gmail(message_id, images_id)
+                images_numpy = [np.array(img) for img in images_pil]
+                st.session_state.masks = images_numpy
+                print(f"text content >>{text_content}<<")
+                print(f"text split >>{text_content.split("\n")}<<")
+                st.session_state.faceXray_pred = [
+                    int(pred.strip()[0]) 
+                    for pred in text_content.split("\n")
+                    if pred.strip() != ""
+                ]
+                st.session_state.mesonet_pred = [
+                    int(pred.strip()[2]) 
+                    for pred in text_content.split("\n")
+                    if pred.strip() != ""
+                ]
+
+            st.session_state.display_meso_pred = False
+            st.session_state.display_fxr_pred = True
+
 
     st.divider()
 
@@ -83,11 +137,14 @@ def main():
         if st.session_state.source is not None:
             st.image(st.session_state.source)
 
-        if st.session_state.masks is not None:
+
+        if st.session_state.display_meso_pred:
             st.subheader(
                 f"{pred_visu[st.session_state.mesonet_pred[0]]}", 
                 divider=pred_color[st.session_state.mesonet_pred[0]]
             )
+
+        if st.session_state.display_fxr_pred:
             st.subheader(
                 f"{pred_visu[st.session_state.faceXray_pred[0]]}", 
                 divider=pred_color[st.session_state.faceXray_pred[0]]
@@ -100,11 +157,13 @@ def main():
         if st.session_state.target is not None:
             st.image(st.session_state.target)
 
-        if st.session_state.masks is not None:
+        if st.session_state.display_meso_pred:
             st.subheader(
                 f"{pred_visu[st.session_state.mesonet_pred[1]]}", 
                 divider=pred_color[st.session_state.mesonet_pred[1]]
             )
+
+        if st.session_state.display_fxr_pred:
             st.subheader(
                 f"{pred_visu[st.session_state.faceXray_pred[1]]}", 
                 divider=pred_color[st.session_state.faceXray_pred[1]]
@@ -113,16 +172,18 @@ def main():
 
 
     with swapped_col:
-        st.header('Swapp')
+        st.header('Swap')
 
         if st.session_state.swapp is not None:
             st.image(st.session_state.swapp)
 
-        if st.session_state.masks is not None:
+        if st.session_state.display_meso_pred:
             st.subheader(
                 f"{pred_visu[st.session_state.mesonet_pred[2]]}", 
                 divider=pred_color[st.session_state.mesonet_pred[2]]
             )
+
+        if st.session_state.display_fxr_pred:
             st.subheader(
                 f"{pred_visu[st.session_state.faceXray_pred[2]]}", 
                 divider=pred_color[st.session_state.faceXray_pred[2]]
