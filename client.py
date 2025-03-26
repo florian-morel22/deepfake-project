@@ -28,7 +28,8 @@ def main():
         st.session_state.swapp = None
         
         st.session_state.masks = None
-        st.session_state.predictions = None
+        st.session_state.faceXray_pred = None
+        st.session_state.mesonet_pred = None
 
 
     st.title('Face swapp Machine')
@@ -44,7 +45,8 @@ def main():
             st.session_state.target = images_bytes[1]
             st.session_state.swapp = None
             st.session_state.masks = None
-            st.session_state.predictions = None
+            st.session_state.faceXray_pred = None
+            st.session_state.mesonet_pred = None
 
     with col2:
         if st.button('Swap Faces'):
@@ -60,7 +62,16 @@ def main():
             st.session_state.masks = images_numpy
             print(f"text content >>{text_content}<<")
             print(f"text split >>{text_content.split("\n")}<<")
-            st.session_state.predictions = [int(pred.strip()) for pred in text_content.split("\n") if pred.strip() in predictions]
+            st.session_state.faceXray_pred = [
+                int(pred.strip()[0]) 
+                for pred in text_content.split("\n")
+                if pred.strip() != ""
+            ]
+            st.session_state.mesonet_pred = [
+                int(pred.strip()[2]) 
+                for pred in text_content.split("\n")
+                if pred.strip() != ""
+            ]
 
     st.divider()
 
@@ -74,8 +85,12 @@ def main():
 
         if st.session_state.masks is not None:
             st.subheader(
-                pred_visu[st.session_state.predictions[0]], 
-                divider=pred_color[st.session_state.predictions[0]]
+                f"{pred_visu[st.session_state.mesonet_pred[0]]}", 
+                divider=pred_color[st.session_state.mesonet_pred[0]]
+            )
+            st.subheader(
+                f"{pred_visu[st.session_state.faceXray_pred[0]]}", 
+                divider=pred_color[st.session_state.faceXray_pred[0]]
             )
             show_masks(st.session_state.masks[0])
 
@@ -87,8 +102,12 @@ def main():
 
         if st.session_state.masks is not None:
             st.subheader(
-                pred_visu[st.session_state.predictions[1]], 
-                divider=pred_color[st.session_state.predictions[1]]
+                f"{pred_visu[st.session_state.mesonet_pred[1]]}", 
+                divider=pred_color[st.session_state.mesonet_pred[1]]
+            )
+            st.subheader(
+                f"{pred_visu[st.session_state.faceXray_pred[1]]}", 
+                divider=pred_color[st.session_state.faceXray_pred[1]]
             )
             show_masks(st.session_state.masks[1])
 
@@ -100,13 +119,15 @@ def main():
             st.image(st.session_state.swapp)
 
         if st.session_state.masks is not None:
-            st.write()
             st.subheader(
-                pred_visu[st.session_state.predictions[2]], 
-                divider=pred_color[st.session_state.predictions[2]]
+                f"{pred_visu[st.session_state.mesonet_pred[2]]}", 
+                divider=pred_color[st.session_state.mesonet_pred[2]]
+            )
+            st.subheader(
+                f"{pred_visu[st.session_state.faceXray_pred[2]]}", 
+                divider=pred_color[st.session_state.faceXray_pred[2]]
             )
             show_masks(st.session_state.masks[2])
-
 
 
 if __name__ == '__main__':
